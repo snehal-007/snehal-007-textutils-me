@@ -41,34 +41,28 @@ def getData(url):
 def index(request):
 
     myHtml = getData("https://www.mohfw.gov.in/")
+    worldhtml = getData("https://www.worldometers.info/coronavirus/")
 
     soup = BeautifulSoup(myHtml,'html.parser')
+    wsoup = BeautifulSoup(worldhtml,'html.parser')
 
-    myStr = ""
+    myStr = []
+    world = []
+    for item in soup.find_all("div",class_="site-stats-count"):
+        for strong in item.find_all("strong"):
+            myStr.append(strong.get_text())
 
-    for tr in soup.find_all('tbody')[9].find_all('tr'):
-            myStr += tr.get_text()
+    for witem in wsoup.find_all("div",class_="maincounter-number"):
+        for span in witem.find_all("span"):
+            world.append(span.get_text())
 
-    myStr = myStr[1:]
+    print(myStr)
+    print(world)
 
-    itemList = myStr.split("\n\n")
+    params = {"Active":myStr[0] ,"Cured":myStr[1] ,"Death":myStr[2] ,"Migrate":myStr[3],"WActive":world[0] ,"WCured":world[1] ,"WDeath":world[2]}
+    
 
-    states = ["Gujarat"]
-
-    for item in itemList[0:]:
-        dataList = item.split("\n")
-        # print(dataList)
-        if dataList[1] in states:
-            print("final list",dataList)
-            params = {"state" : dataList[1],"Case":dataList[2] }
-            return render(request,'index.html',params)
-            
-            # print(f"State:-{dataList[0]}\nCase:-{dataList[1]}")
-
-
-
-
-    return render(request,'index.html')
+    return render(request,'index.html',params)
 
 def analyze(request):
     # Get the Text
